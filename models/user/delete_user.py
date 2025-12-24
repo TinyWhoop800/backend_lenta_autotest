@@ -1,9 +1,9 @@
 from pydantic import BaseModel
-from typing import List
 
-class Datum(BaseModel):
+
+class DeleteUserData(BaseModel):
     userId: int
 
 class DeleteUser(BaseModel):
     message: str
-    data: List[Datum]
+    data: DeleteUserData

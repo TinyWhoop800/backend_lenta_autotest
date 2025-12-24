@@ -2,7 +2,7 @@ from typing import Dict, List, Any
 
 APPS_LENTA: List[Dict[str, Any]] = [
     {
-        "app_name": "Кинолента",
+        "app_name": "KinoLenta",
         "platform": "iOS",
         "headers": {
             'X-Device-ID': 'testb2cf59b36581399ebf54d4ab425ac4a1',
@@ -11,7 +11,7 @@ APPS_LENTA: List[Dict[str, Any]] = [
         }
     },
     {
-        "app_name": "Кинолента",
+        "app_name": "KinoLenta",
         "platform": "Android",
         "headers": {
             'X-Device-ID': 'testb2cf59b36581399ebf54d4ab425ac4a1',
@@ -20,7 +20,7 @@ APPS_LENTA: List[Dict[str, Any]] = [
         }
     },
     {
-        "app_name": "Кинолента",
+        "app_name": "KinoLenta",
         "platform": "Web",
         "headers": {
             'X-Device-ID': 'testb2cf59b36581399ebf54d4ab425ac4a1',

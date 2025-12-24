@@ -1,60 +1,25 @@
-# tests/test_first.py
-import pytest
-from clients.api_client import APIClient
-from config.settings import settings
-from config.apps import APPS_LENTA
-from api.endpoints import Endpoints
+from models.auth.post_guest_login import PostGuestLogin
+from models.user.delete_user import DeleteUser
+from assertions.response_validator import check_status, check_schema, check_time
+from api.requests.auth.post_guest_login import post_guest_login
+from api.requests.user.delete_user import delete_user
 
 
-def test_first(api_client, headers, app_config):
-    """Самый первый тест - проверим что все работает"""
+def test_first(app_config, api_client):
+    # Guest login
+    login_response = post_guest_login(api_client, app_config)
+    login_json = login_response.json()
 
-    # 1. Создаем клиент
-    api_client = APIClient(settings.BASE_URL)
+    check_status(login_response, 200)
+    check_schema(login_json, PostGuestLogin)
+    check_time(login_response, 1)
 
-    # 2. Берем первое приложение
-    app = APPS_LENTA[0]
-    print(f"Тестируем: {app['app_name']} ({app['platform']})")
+    token = login_json["token"]
 
-    # 3. Делаем заголовки
-    headers = app["headers"].copy()
+    # Delete user
+    delete_response = delete_user(api_client, app_config, token)
+    delete_json = delete_response.json()
 
-    endpoint = Endpoints.POST_GUEST_LOGIN
-    print(f"Отправляю запрос на: {api_client.base_url}{endpoint.value}")  # <- .value здесь!
-    print(f"Используя следующие headers: {headers}")
-
-    response = api_client.post(endpoint, headers=headers)
-
-    # 5. Проверяем
-    assert response.status_code == 200, f"Ошибка: {response.status_code}"
-    print(f"✓ Гость создан!")
-
-    # 6. Берем токен
-    token = response.json()['token']
-    print(f"Токен: {token[:20]}...")
-
-    # 7. Добавляем токен в заголовки
-    auth_headers = headers.copy()
-    auth_headers["Authorization"] = f"Bearer {token}"
-
-    # 8. Пробуем получить информацию о пользователе
-    user_response = api_client.get(
-        Endpoints.GET_USER,
-        headers=auth_headers
-    )
-    assert user_response.status_code == 200
-    print(f"✓ Информация о пользователе получена")
-
-    # 9. Удаляем пользователя
-    delete_response = api_client.delete(
-        Endpoints.DELETE_USER,
-        headers=auth_headers
-    )
-    assert delete_response.status_code == 200
-    print(f"✓ Пользователь удален")
-
-    print(f"✅ Тест пройден!")
-
-
-if __name__ == "__main__":
-    test_first()
+    check_status(delete_response, 200)
+    check_schema(delete_json, DeleteUser)
+    check_time(delete_response, 1)
