@@ -1,6 +1,7 @@
 import requests
-from typing import Union  # Добавьте этот импорт
+from typing import Union
 from api.endpoints import Endpoints
+import allure
 
 
 class APIClient:
@@ -18,7 +19,9 @@ class APIClient:
         if isinstance(endpoint, Endpoints):
             endpoint = endpoint.value
         url = self._prepare_url(endpoint)
+        # Отправляем запрос
         return self.session.post(url, **kwargs)
+
 
     def get(self, endpoint: Union[str, Endpoints], **kwargs):
         if isinstance(endpoint, Endpoints):
@@ -26,6 +29,7 @@ class APIClient:
         url = self._prepare_url(endpoint)
         return self.session.get(url, **kwargs)
 
+    @allure.step("DELETE запрос")
     def delete(self, endpoint: Union[str, Endpoints], **kwargs):
         if isinstance(endpoint, Endpoints):
             endpoint = endpoint.value

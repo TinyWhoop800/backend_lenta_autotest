@@ -1,6 +1,9 @@
 from api.endpoints import Endpoints
+from utils.allure_curl import attach_curl
+import allure
 
 
+@allure.step("Удаление пользователя")
 def delete_user(api_client, app_config, token):
     """Удаление пользователя - возвращает requests.Response"""
     endpoint = Endpoints.DELETE_USER.value
@@ -10,4 +13,5 @@ def delete_user(api_client, app_config, token):
         f"{api_client.base_url}{endpoint}",
         headers=headers
     )
-    return response  # ← Возвращаем Response, а не JSON
+    attach_curl(response, "curl: DELETE /users/me")
+    return response

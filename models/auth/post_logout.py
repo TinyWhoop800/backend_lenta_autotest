@@ -1,9 +1,9 @@
 from pydantic import BaseModel
-from typing import List
 
-class Datum(BaseModel):
+
+class LogoutData(BaseModel):
     userId: int
 
-class PostLogout(BaseModel):
+class Logout(BaseModel):
     message: str
-    data: List[Datum]
+    data: LogoutData
