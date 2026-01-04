@@ -2,12 +2,9 @@ import pytest
 from config.apps import APPS_LENTA
 from clients.api_client import APIClient
 from config.settings import settings
-import allure
 from api.requests.auth.post_guest_login import post_guest_login
 from api.requests.user.delete_user import delete_user
 from assertions.response_validator import check_status
-from models.auth.post_guest_login import PostGuestLogin
-from models.user.delete_user import DeleteUser
 
 @pytest.fixture(scope="session")
 def api_client():
