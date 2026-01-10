@@ -1,0 +1,24 @@
+from assertions.response_validator import check_status, check_schema, check_time
+import allure
+from api.requests.coin_packeges.get_coin_packages import get_coin_packages
+from models.coin_packeges_model.get_coin_packages_model import GetCoinPackagesModel
+
+
+@allure.epic("Coin Packages")
+@allure.feature("GET /coin-packages")
+@allure.story("Позитивные сценарии")
+class TestGetCoinPackagesPositive:
+
+    @allure.title("Успешное получение пакетов с монетами")
+    def test_get_coin_packages_success(self, app_config, api_client, app_token):
+        """Успешное получение пакетов монет"""
+        with allure.step("GET requests /coin-packages"):
+            response = get_coin_packages(api_client, app_config, app_token)
+
+        with allure.step("Проверки ответа"):
+            check_status(response, 200)
+
+            response_json = response.json()
+            validated_data = check_schema(response_json, GetCoinPackagesModel)
+
+            check_time(response, 1)
