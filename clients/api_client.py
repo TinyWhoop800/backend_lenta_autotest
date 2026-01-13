@@ -106,7 +106,7 @@ class APIClient:
         logger.debug(f"POST {url}")
         return self.session.post(url, headers=headers, **kwargs)
 
-    @allure.step("GET {endpoint}")
+    @allure.step("GET запрос")
     def get(
             self,
             endpoint: Union[str, Endpoints],

@@ -1,9 +1,7 @@
 from config.apps import APPS_LENTA
 from api.requests.collections.get_collections import get_collections
-# from api.requests.coin_packages.get_coin_packages import get_coin_packages
 from assertions.response_validator import check_status, check_schema
-from models.collections_model.get_collections_model import
-from models.coin_packages_model.get_coin_packages_model import GetCoinPackagesModel
+from models.collections_model.get_collections_model import GetCollectionsModel
 from clients.api_client import APIClient
 from config.settings import settings
 from api.requests.auth.post_guest_login import post_guest_login
@@ -14,32 +12,32 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-_coin_test_data = {}
+_collections_test_data = {}
 
 
 @dataclass
-class PreparedApiClient:
+class PreparedApiClientCollections:
     """
-    Объект который содержит всё необходимое для теста.
+    Объект со всем необходимым для теста collections.
 
-    Это одно место, где мы инкапсулируем всю подготовку.
+    Содержит клиент, токен и список collection_id для текущего приложения.
     """
     client: APIClient
     token: str
     app_config: dict
-    payment_type: str
-    coin_id: str
+    collection_id: int
 
 
-def _load_coin_data():
-    """Загружает coin данные ДО всех тестов"""
-    global _coin_test_data
+def _load_collections_data():
+    """Загружает collections данные ДО всех тестов"""
+    global _collections_test_data
 
-    if _coin_test_data:
+    if _collections_test_data:
         return
 
     tokens = {}
 
+    # Получаем токены для всех приложений
     for app in APPS_LENTA:
         key = f"{app['app_name']}_{app['platform']}"
 
@@ -57,11 +55,8 @@ def _load_coin_data():
         finally:
             temp_client.close()
 
-    # Собираем coin данные
+    # Собираем collection данные
     for app in APPS_LENTA:
-        if "payment_types" not in app or not app["payment_types"]:
-            continue
-
         key = f"{app['app_name']}_{app['platform']}"
         token = tokens.get(key)
         if not token:
@@ -75,18 +70,20 @@ def _load_coin_data():
         )
 
         try:
-            resp = get_coin_packages(temp_client, token)
+            resp = get_collections(temp_client, token)
             check_status(resp, 200)
-            validated = check_schema(resp.json(), GetCoinPackagesModel)
-            coin_ids = [pkg.id for pkg in validated.coinPackages]
+            validated = check_schema(resp.json(), GetCollectionsModel)
 
-            _coin_test_data[key] = {
+            # Извлекаем collection_id из data массива
+            collection_ids = [collection.id for collection in validated.data]
+
+            _collections_test_data[key] = {
                 "app": app,
-                "coin_ids": coin_ids,
-                "payment_types": app["payment_types"]
+                "collection_ids": collection_ids
             }
+            logger.info(f"Loaded {len(collection_ids)} collections for {key}")
         except Exception as e:
-            logger.error(f"ERROR loading coin data for {key}: {e}")
+            logger.error(f"ERROR loading collections for {key}: {e}")
         finally:
             temp_client.close()
 
@@ -114,53 +111,50 @@ def _load_coin_data():
 
 def pytest_configure(config):
     """Вызывается САМЫМ ПЕРВЫМ перед collection"""
-    _load_coin_data()
+    _load_collections_data()
 
 
 def pytest_generate_tests(metafunc):
     """
-    Генерирует параметры для тестов coin_packages.
+    Генерирует параметры для тестов collections.
 
-    Создаёт комбинации: payment_type × coin_id × app_config
+    Создаёт комбинации: collection_id × app_config
     """
-    if "prepared_api_client" not in metafunc.fixturenames:
+    if "prepared_api_client_collections" not in metafunc.fixturenames:
         return
 
     argvalues = []
     ids = []
 
-    for key, data in _coin_test_data.items():
-        for payment_type in data["payment_types"]:
-            for coin_id in data["coin_ids"]:
-                # Каждый параметр — полная информация для одного теста
-                argvalues.append({
-                    "payment_type": payment_type,
-                    "coin_id": coin_id,
-                    "app_config": data["app"]
-                })
-                ids.append(f"{key}-{payment_type}-{coin_id[:8]}")
+    for key, data in _collections_test_data.items():
+        for collection_id in data["collection_ids"]:
+            # Каждый параметр — полная информация для одного теста
+            argvalues.append({
+                "collection_id": collection_id,
+                "app_config": data["app"]
+            })
+            ids.append(f"{key}-collection_{collection_id}")
 
     if argvalues:
         metafunc.parametrize(
-            "prepared_api_client",
+            "prepared_api_client_collections",
             argvalues,
             ids=ids,
-            indirect=True  # ← КЛЮЧЕВОЙ момент: фикстур получит этот параметр
+            indirect=True
         )
 
 
 @pytest.fixture
-def prepared_api_client(request, api_client_factory, session_tokens):
+def prepared_api_client_collections(request, api_client_factory, session_tokens):
     """
-    ГЛАВНЫЙ фикстур для тестов coin_packages.
+    Фикстур для тестов collections.
 
     Принимает параметры из pytest_generate_tests (через indirect=True),
     сам создаёт клиент, берёт токен, и возвращает готовый объект.
     """
     param = request.param
     app_config = param["app_config"]
-    payment_type = param["payment_type"]
-    coin_id = param["coin_id"]
+    collection_id = param["collection_id"]
 
     # Создаём клиент с нужными headers
     api_client = api_client_factory(app_config)
@@ -170,10 +164,9 @@ def prepared_api_client(request, api_client_factory, session_tokens):
     token = session_tokens[key]
 
     # Возвращаем готовый объект
-    return PreparedApiClient(
+    return PreparedApiClientCollections(
         client=api_client,
         token=token,
         app_config=app_config,
-        payment_type=payment_type,
-        coin_id=coin_id
+        collection_id=collection_id
     )

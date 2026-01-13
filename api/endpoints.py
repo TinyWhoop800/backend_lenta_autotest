@@ -16,8 +16,8 @@ class Endpoints(Enum):
 
     """Collections"""
     GET_COLLECTIONS = "/collections"
-    GET_COLLECTIONS_COLLECTION = "/collections_model/{collection}"
-    GET_COLLECTIONS_COLLECTION_CONTENTS = "/collections_model/{collection}/contents"
+    GET_COLLECTIONS_COLLECTION = "/collections/{collection}"
+    GET_COLLECTIONS_COLLECTION_CONTENTS = "/collections/{collection}/contents"
 
     """Contents"""
     GET_NEXT_TITLE = "/next-title"
@@ -26,7 +26,7 @@ class Endpoints(Enum):
 
     """Genres"""
     GET_GENRES = "/genres"
-    GET_GENRES_GENREID_CONTENTS = "/genres/{genre_Id}/contents"
+    GET_GENRES_GENRE_ID_CONTENTS = "/genres/{genre_Id}/contents"
 
     """Episodes"""
     POST_EPISODES_EPISODE_LIKE = "/episodes/{episode}/like"

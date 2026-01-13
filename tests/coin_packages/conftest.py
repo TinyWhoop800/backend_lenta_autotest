@@ -143,7 +143,7 @@ def pytest_generate_tests(metafunc):
             "prepared_api_client",
             argvalues,
             ids=ids,
-            indirect=True  # ← КЛЮЧЕВОЙ момент: фикстур получит этот параметр
+            indirect=True
         )
 
 
