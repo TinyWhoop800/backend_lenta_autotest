@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 @allure.step("POST /coin-packages (coin_package_id={coin_package_id}, payment_type={payment_type})")
-def post_coin_package(api_client, app_config, token, coin_package_id: str, payment_type: str, return_url: str = "kinolenta://"):
+def post_coin_package(api_client, token: str, coin_package_id: str, payment_type: str, return_url: str = "kinolenta://"):
 
     api_client.set_token(token)
 
@@ -29,7 +29,6 @@ def post_coin_package(api_client, app_config, token, coin_package_id: str, payme
 
     response = api_client.post(
         Endpoints.POST_COIN_PACKAGES,
-        headers=app_config["headers"],
         data=form_data
     )
 

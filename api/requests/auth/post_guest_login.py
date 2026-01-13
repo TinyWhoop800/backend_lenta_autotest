@@ -4,15 +4,14 @@ import allure
 
 
 @allure.step("POST /guest/login")
-def post_guest_login(api_client, app_config):
+def post_guest_login(api_client):
     """
     Guest login - возвращает requests.Response.
 
-    Этот endpoint не требует авторизации.
+    Этот endpoint не требует авторизации (with_auth=False).
     """
     response = api_client.post(
         Endpoints.POST_GUEST_LOGIN,
-        headers=app_config["headers"],
         with_auth=False
     )
     attach_curl(response, "curl: POST /guest/login")

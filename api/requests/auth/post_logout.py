@@ -4,13 +4,10 @@ import allure
 
 
 @allure.step("POST /logout (token)")
-def post_logout_with_token(api_client, app_config, token):
+def post_logout_with_token(api_client, token):
     """Positive logout - с валидным токеном"""
     api_client.set_token(token)
-    response = api_client.post(
-        Endpoints.POST_LOGOUT,
-        headers=app_config["headers"]
-    )
+    response = api_client.post(Endpoints.POST_LOGOUT)
     attach_curl(response, "curl: POST /logout")
     attach_response_details(response)
     api_client.clear_token()
@@ -18,11 +15,10 @@ def post_logout_with_token(api_client, app_config, token):
 
 
 @allure.step("POST /logout (no token)")
-def post_logout_without_token(api_client, app_config):
+def post_logout_without_token(api_client):
     """Negative logout - без токена"""
     response = api_client.post(
         Endpoints.POST_LOGOUT,
-        headers=app_config["headers"],
         with_auth=False
     )
     attach_curl(response, "curl: POST /logout (без токена)")

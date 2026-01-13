@@ -26,21 +26,21 @@ def check_status(response, expected_code: int, message: str = "") -> None:
 
 @allure.step("Проверить JSON схему:")
 def check_schema(
-        response_json: dict,
+        response_json,
         model_class: Type[BaseModel]
 ) -> BaseModel:
     """
     Валидация JSON через Pydantic и возврат объекта.
 
     Args:
-        response_json: Словарь для валидации
+        response_json: Словарь, список или другие данные для валидации
         model_class: Pydantic модель
 
     Returns:
         BaseModel: Валидированный объект
 
     Raises:
-        ValidationError: Если валидация не прошла
+        AssertionError: Если валидация не прошла
     """
     try:
         validated = model_class.model_validate(response_json)
@@ -48,7 +48,7 @@ def check_schema(
         return validated
     except ValidationError as e:
         error_details = "\n".join([
-            f"Field: {err['loc'][0]}, Error: {err['msg']}"
+            f"Field: {err.get('loc', ('root',))[0]}, Error: {err['msg']}"
             for err in e.errors()
         ])
         allure.attach(
@@ -57,7 +57,8 @@ def check_schema(
             attachment_type=allure.attachment_type.TEXT
         )
         logger.error(f"Schema validation failed:\n{error_details}")
-        raise
+        # ← Вот это ключевое изменение
+        raise AssertionError(f"Schema validation failed:\n{error_details}") from e
 
 
 @allure.step("Проверить время ответа: < {max_seconds}s")
@@ -80,6 +81,53 @@ def check_time(response, max_seconds: float) -> float:
         f"Время ответа {elapsed:.2f}s превышает лимит {max_seconds}s"
     logger.debug(f"Response time check passed: {elapsed:.3f}s <= {max_seconds}s")
     return elapsed
+
+
+@allure.step("Проверить количество элементов: {key} == {expected_count}")
+def check_array_length(
+        response_json: Any,
+        expected_count: int,
+        key: Optional[str] = None
+) -> int:
+    """
+    Проверить количество элементов в массиве или объекте.
+
+    Args:
+        response_json: JSON ответ (список или словарь)
+        expected_count: Ожидаемое количество элементов
+        key: Опциональный ключ для вложенного массива (поддерживает nested: "data.items")
+             Если не указан, считает корневой массив/объект
+
+    Returns:
+        int: Фактическое количество элементов
+
+    Raises:
+        AssertionError: Если количество не совпадает
+    """
+    if key:
+        # Поддержка nested ключей: "data.items"
+        keys = key.split(".")
+        actual_array = response_json
+
+        try:
+            for k in keys:
+                actual_array = actual_array[k]
+        except (KeyError, TypeError, IndexError):
+            raise AssertionError(f"Key '{key}' not found in response")
+    else:
+        actual_array = response_json
+
+    # Считаем элементы в зависимости от типа
+    if isinstance(actual_array, (list, dict)):
+        actual_count = len(actual_array)
+    else:
+        raise AssertionError(f"Expected list or dict, got {type(actual_array).__name__}")
+
+    assert actual_count == expected_count, \
+        f"Expected {expected_count} elements, got {actual_count}"
+
+    logger.debug(f"Array length check passed: {actual_count} == {expected_count}")
+    return actual_count
 
 
 @allure.step("Проверить значение в JSON: {key} == {expected_value}")

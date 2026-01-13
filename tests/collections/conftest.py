@@ -1,6 +1,8 @@
 from config.apps import APPS_LENTA
-from api.requests.coin_packages.get_coin_packages import get_coin_packages
+from api.requests.collections.get_collections import get_collections
+# from api.requests.coin_packages.get_coin_packages import get_coin_packages
 from assertions.response_validator import check_status, check_schema
+from models.collections_model.get_collections_model import
 from models.coin_packages_model.get_coin_packages_model import GetCoinPackagesModel
 from clients.api_client import APIClient
 from config.settings import settings
