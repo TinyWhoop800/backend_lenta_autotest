@@ -17,3 +17,19 @@ def post_guest_login(api_client):
     attach_curl(response, "curl: POST /guest/login")
     attach_response_details(response)
     return response
+
+
+"""
+Raw версия post_guest_login БЕЗ Allure attachments.
+Используется при загрузке тестовых данных в conftest.
+"""
+
+def post_guest_login_raw(api_client):
+    """
+    Получить гостевой токен (БЕЗ Allure attachments).
+
+    Используется ТОЛЬКО при загрузке данных в pytest_configure,
+    где Allure ещё не инициализирован.
+    """
+    response = api_client.post(Endpoints.POST_GUEST_LOGIN, with_auth=False)
+    return response

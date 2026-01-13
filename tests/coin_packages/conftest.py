@@ -1,11 +1,11 @@
 from config.apps import APPS_LENTA
-from api.requests.coin_packages.get_coin_packages import get_coin_packages
+from api.requests.coin_packages.get_coin_packages import get_coin_packages_raw
 from assertions.response_validator import check_status, check_schema
 from models.coin_packages_model.get_coin_packages_model import GetCoinPackagesModel
 from clients.api_client import APIClient
 from config.settings import settings
-from api.requests.auth.post_guest_login import post_guest_login
-from api.requests.user.delete_user import delete_user
+from api.requests.auth.post_guest_login import post_guest_login_raw
+from api.requests.user.delete_user import delete_user_raw
 from dataclasses import dataclass
 import pytest
 import logging
@@ -49,7 +49,7 @@ def _load_coin_data():
         )
 
         try:
-            login_response = post_guest_login(temp_client)
+            login_response = post_guest_login_raw(temp_client)
             if login_response.status_code == 200:
                 tokens[key] = login_response.json()["token"]
         finally:
@@ -73,7 +73,7 @@ def _load_coin_data():
         )
 
         try:
-            resp = get_coin_packages(temp_client, token)
+            resp = get_coin_packages_raw(temp_client, token)
             check_status(resp, 200)
             validated = check_schema(resp.json(), GetCoinPackagesModel)
             coin_ids = [pkg.id for pkg in validated.coinPackages]
@@ -103,7 +103,7 @@ def _load_coin_data():
         )
 
         try:
-            delete_user(temp_client, token)
+            delete_user_raw(temp_client, token)
         except Exception as e:
             logger.warning(f"Failed to cleanup user {key}: {e}")
         finally:
