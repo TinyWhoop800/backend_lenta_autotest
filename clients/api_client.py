@@ -10,6 +10,10 @@ logger = logging.getLogger(__name__)
 
 
 class APIClient:
+    """
+    API клиент с встроенным управлением headers и токенами.
+    """
+
     def __init__(
             self,
             base_url: str,
@@ -22,7 +26,9 @@ class APIClient:
         self.default_headers = default_headers or {}
         self.token = None
 
-        # Настройка retry logic для 429 и других ошибок
+        # Применяем дефолтные headers к сессии
+        self.session.headers.update(self.default_headers)
+
         self._setup_retries(retries, backoff_factor)
 
     def _setup_retries(self, retries: int = 3, backoff_factor: float = 0.3) -> None:
@@ -50,35 +56,24 @@ class APIClient:
         self.token = None
         logger.debug("Token cleared")
 
-    def _get_headers(
-            self,
-            headers: Optional[Dict[str, str]] = None,
-            with_auth: bool = True
-    ) -> Dict[str, str]:
-        """Объединить дефолтные хидеры с переданными"""
-        result = self.default_headers.copy()
-        if headers:
-            result.update(headers)
+    def _get_headers(self, with_auth: bool = True) -> Dict[str, str]:
+        """
+        Берём дефолтные headers из self.default_headers
+        """
+        headers = self.session.headers.copy()
         if with_auth and self.token:
-            result["Authorization"] = f"Bearer {self.token}"
-        return result
+            headers["Authorization"] = f"Bearer {self.token}"
+        return headers
 
     def _prepare_url(
             self,
             endpoint: Union[str, Endpoints],
             url_params: Optional[Dict[str, Any]] = None
     ) -> str:
-        """
-        Подготовить URL с подстановкой параметров.
-
-        Примеры:
-            /episodes/{episode} + {episode: "123"} -> /episodes/123
-            /collections/{collection}/contents + {collection: "abc"} -> /collections/abc/contents
-        """
+        """Подготовить URL с подстановкой параметров"""
         if isinstance(endpoint, Endpoints):
             endpoint = endpoint.value
 
-        # Подстановка параметров в URL
         if url_params:
             try:
                 endpoint = endpoint.format(**url_params)
@@ -93,7 +88,6 @@ class APIClient:
     def post(
             self,
             endpoint: Union[str, Endpoints],
-            headers: Optional[Dict[str, str]] = None,
             with_auth: bool = True,
             url_params: Optional[Dict[str, Any]] = None,
             **kwargs
@@ -103,45 +97,42 @@ class APIClient:
 
         Args:
             endpoint: Endpoint или Enum
-            headers: Дополнительные хидеры
             with_auth: Добавлять ли Authorization header
             url_params: Параметры для подстановки в URL
             **kwargs: Остальные параметры для requests.post()
         """
         url = self._prepare_url(endpoint, url_params)
-        final_headers = self._get_headers(headers, with_auth)
+        headers = self._get_headers(with_auth)
         logger.debug(f"POST {url}")
-        return self.session.post(url, headers=final_headers, **kwargs)
+        return self.session.post(url, headers=headers, **kwargs)
 
     @allure.step("GET {endpoint}")
     def get(
             self,
             endpoint: Union[str, Endpoints],
-            headers: Optional[Dict[str, str]] = None,
             with_auth: bool = True,
             url_params: Optional[Dict[str, Any]] = None,
             **kwargs
     ):
-        """GET запрос"""
+        """GET запрос."""
         url = self._prepare_url(endpoint, url_params)
-        final_headers = self._get_headers(headers, with_auth)
+        headers = self._get_headers(with_auth)
         logger.debug(f"GET {url}")
-        return self.session.get(url, headers=final_headers, **kwargs)
+        return self.session.get(url, headers=headers, **kwargs)
 
     @allure.step("DELETE {endpoint}")
     def delete(
             self,
             endpoint: Union[str, Endpoints],
-            headers: Optional[Dict[str, str]] = None,
             with_auth: bool = True,
             url_params: Optional[Dict[str, Any]] = None,
             **kwargs
     ):
-        """DELETE запрос"""
+        """DELETE запрос."""
         url = self._prepare_url(endpoint, url_params)
-        final_headers = self._get_headers(headers, with_auth)
+        headers = self._get_headers(with_auth)
         logger.debug(f"DELETE {url}")
-        return self.session.delete(url, headers=final_headers, **kwargs)
+        return self.session.delete(url, headers=headers, **kwargs)
 
     def close(self):
         """Закрыть сессию"""

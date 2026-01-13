@@ -16,8 +16,8 @@ class Endpoints(Enum):
 
     """Collections"""
     GET_COLLECTIONS = "/collections"
-    GET_COLLECTIONS_COLLECTION = "/collections/{collection}"
-    GET_COLLECTIONS_COLLECTION_CONTENTS = "/collections/{collection}/contents"
+    GET_COLLECTIONS_COLLECTION = "/collections_model/{collection}"
+    GET_COLLECTIONS_COLLECTION_CONTENTS = "/collections_model/{collection}/contents"
 
     """Contents"""
     GET_NEXT_TITLE = "/next-title"
@@ -58,7 +58,8 @@ class Endpoints(Enum):
     POST_REWARDS_SLUG = "/rewards/{slug}"
 
     """Search"""
-    GET_SEARCH = "/search"
+    GET_SEARCH = "/search_models"
+    GET_SEARCH_HINTS = "/search/hints"
 
     """Subscriptions"""
     GET_SUBSCRIPTIONS = "/subscriptions"

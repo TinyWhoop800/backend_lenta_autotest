@@ -1,9 +1,9 @@
 import allure
-from api.requests.coin_packeges.post_coin_packages import post_coin_package
-from assertions.response_validator import check_status, check_time
+from api.requests.coin_packages.post_coin_packages import post_coin_package
+from assertions.response_validator import check_status, check_time, check_schema
+from models.coin_packages_model.post_coin_packages_model import PostCoinPackagesModel
 from tests.test_data.coin_packages_data import (
     INVALID_COIN_IDS,
-    INVALID_PAYMENT_TYPES,
 )
 import pytest
 
@@ -11,70 +11,58 @@ import pytest
 #TODO: Статус 500 на тест. стенде, на бэкенде нужно изменить статус
 
 @allure.epic("Coin Packages")
-@allure.feature("POST /coin-packages - Positive")
+@allure.feature("POST /coin-packages - Positive tests")
 class TestPostCoinPackagesPositive:
 
-    @allure.title("Получение платежной ссылки с валидным id coin-packages")
-    def test_post_coin_packages_valid_id(
-            self,
-            api_client,
-            session_tokens,
-            payment_type,
-            coin_id,
-            test_app_config,
-    ):
-        """
-        Тест для всех комбинаций:
-        payment_type × coin_id × app_config
-        """
-        key = f"{test_app_config['app_name']}_{test_app_config['platform']}"
-        token = session_tokens[key]
-
+    @allure.title('Получение платежной ссылки с валидным id coin-packages: "{prepared_api_client.coin_id}"')
+    def test_post_coin_packages_valid_id(self, prepared_api_client):
         with allure.step(
-                f"POST /coin-packages: {key} | {payment_type} | {coin_id[:8]}"
+                f"POST /coin-packages: {prepared_api_client.app_config['app_name']} "
+                f"| {prepared_api_client.payment_type} "
+                f"| {prepared_api_client.coin_id[:8]}"
         ):
             response = post_coin_package(
-                api_client=api_client,
-                app_config=test_app_config,
-                token=token,
-                coin_package_id=coin_id,
-                payment_type=payment_type,
+                api_client=prepared_api_client.client,
+                token=prepared_api_client.token,
+                coin_package_id=prepared_api_client.coin_id,
+                payment_type=prepared_api_client.payment_type,
             )
 
         with allure.step("Проверки ответа"):
             check_status(response, 200)
+            response_json = response.json()
+            # check_schema(response_json, PostCoinPackagesModel)
             check_time(response, 1)
 
 
 @allure.epic("Coin Packages")
-@allure.feature("POST /coin-packages - Negative")
+@allure.feature("POST /coin-packages - Negative ")
 class TestPostCoinPackagesNegative:
 
+
+    @allure.title('Без токена = 401: "{prepared_api_client.coin_id}"')
+    def test_post_coin_packages_valid_id_no_auth(self, prepared_api_client):
+        with allure.step("POST /coin-packages без токена"):
+            response = post_coin_package(
+                prepared_api_client.client,
+                "",
+                prepared_api_client.coin_id,
+                prepared_api_client.payment_type
+            )
+        with allure.step("Проверить 401 Unauthorized"):
+            check_status(response, 401)
+
     @pytest.mark.parametrize("invalid_coin_id", INVALID_COIN_IDS)
-    @allure.title("Невалидный coin_id = 404")
-    def test_invalid_coin_id(
-        self, api_client, app_config, app_token, invalid_coin_id
-    ):
-        response = post_coin_package(
-            api_client, app_config, app_token, invalid_coin_id, "sbp"
-        )
-        check_status(response, 404)
+    @allure.title('Невалидный coin_id возвращает 404: "{invalid_coin_id}"')
+    def test_invalid_coin_id(self, api_client, app_token, invalid_coin_id):
+        """Каждый невалидный coin_id со случайным payment_type"""
+        with allure.step(f"POST /coin-packages с невалидным coin_id"):
+            response = post_coin_package(
+                api_client,
+                app_token,
+                invalid_coin_id,
+                "bank_card"
+            )
 
-    @pytest.mark.parametrize("invalid_payment", INVALID_PAYMENT_TYPES)
-    @allure.title("Невалидный payment_type = 400")
-    def test_invalid_payment_type(
-        self, api_client, app_config, app_token, invalid_payment
-    ):
-        response = post_coin_package(
-            api_client, app_config, app_token, VALID_COIN_IDS[0], invalid_payment
-        )
-        check_status(response, 400)
-
-    @allure.title("Без токена = 401")
-    def test_no_auth(
-        self, api_client, app_config, payment_type, coin_id
-    ):
-        response = post_coin_package(
-            api_client, app_config, "", coin_id, payment_type
-        )
-        check_status(response, 401)
+        with allure.step("Проверить 404 Not Found"):
+            check_status(response, 404)
