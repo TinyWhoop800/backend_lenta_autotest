@@ -21,6 +21,8 @@ class Endpoints(Enum):
 
     """Contents"""
     GET_NEXT_TITLE = "/next-title"
+    #TODO: GET_CONTENT нет в swagger
+    GET_CONTENT = "/content/{page}"
     GET_CONTENTS_CONTENT = "/contents/{content}"
     GET_CONTENTS_CONTENT_EPISODES = "/contents/{content}/episodes"
 
@@ -34,9 +36,9 @@ class Endpoints(Enum):
     POST_EPISODES_EPISODE_PURCHASE = "/episodes/{episode}/purchase"
 
     """Favorites"""
-    GET_FAVORITES_CONTENTS = "/favorites/contents"
-    POST_FAVORITES_CONTENTS_CONTENT = "/favorites/contents/{content}"
-    DELETE_FAVORITES_CONTENTS_CONTENT = "/favorites/contents/{content}"
+    GET_FAVORITES_CONTENTS = "/favorites/contents_models"
+    POST_FAVORITES_CONTENTS_CONTENT = "/favorites/contents_models/{content}"
+    DELETE_FAVORITES_CONTENTS_CONTENT = "/favorites/contents_models/{content}"
 
     """History"""
     GET_HISTORY = "/history"

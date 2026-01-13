@@ -3,7 +3,7 @@ from utils.allure_curl import attach_curl, attach_response_details
 import allure
 
 
-@allure.step("GET /collections/{collection_id}/contents")
+@allure.step("GET /collections/{collection_id}/contents_models")
 def get_collections_collection_contents(api_client, token, collection_id):
     """Получение коллекций"""
     api_client.set_token(token)
@@ -12,6 +12,6 @@ def get_collections_collection_contents(api_client, token, collection_id):
         with_auth=True,
         url_params={"collection": collection_id}
     )
-    attach_curl(response, f"curl: GET /collections/{collection_id}/contents")
+    attach_curl(response, f"curl: GET /collections/{collection_id}/contents_models")
     attach_response_details(response)
     return response
