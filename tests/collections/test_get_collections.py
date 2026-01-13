@@ -7,7 +7,7 @@ from models.collections_model.get_collections_model import GetCollectionsModel
 @allure.epic("Collections")
 @allure.feature("GET /collections")
 @allure.story("Позитивные сценарии")
-class TestGetCoinPackagesPositive:
+class TestGetCollectionsPositive:
 
     @allure.title("Успешное получение списка коллекций")
     def test_get_collections_status_200(self, api_client, app_token):
