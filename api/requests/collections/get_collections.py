@@ -17,8 +17,7 @@ Raw версия get_coin_packages БЕЗ Allure attachments.
 Используется при загрузке тестовых данных в conftest.
 """
 
-def get_collections_raw(api_client, token):
-    """Получение коллекций"""
-    api_client.set_token(token)
-    response = api_client.get(Endpoints.GET_COLLECTIONS)
+def get_collections_raw(api_client):
+    """Получение коллекций (БЕЗ Allure, БЕЗ токена)"""
+    response = api_client.get(Endpoints.GET_COLLECTIONS, with_auth=False)
     return response
