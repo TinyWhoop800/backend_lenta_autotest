@@ -31,8 +31,7 @@ class TestPostCoinPackagesPositive:
         with allure.step("Проверки ответа"):
             check_status(response, 200)
             response_json = response.json()
-            # check_schema(response_json, PostCoinPackagesModel)
-            check_time(response, 1)
+            check_schema(response_json, PostCoinPackagesModel)
 
 
 @allure.epic("Coin Packages")

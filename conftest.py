@@ -41,21 +41,10 @@ def api_client_factory():
         logger.info(f"Closed API client: {key}")
 
 
-# ВАЖНО: app_config параметризирован ТОЛЬКО для тестов, которые его явно запрашивают
-# Для тестов, которые получают параметры через pytest_generate_tests (как coin_packages),
-# этот фикстур НЕ должен применяться автоматически
 @pytest.fixture(params=APPS_LENTA, ids=lambda app: f"{app['app_name']}_{app['platform']}")
 def app_config(request):
     """
     Параметризированный фикстур со всеми app конфигами.
-
-    ВАЖНО: Используется ТОЛЬКО для тестов, которые:
-    - Явно запрашивают app_config в сигнатуре
-    - НЕ получают параметры через pytest_generate_tests
-
-    Для coin_packages параметры идут через pytest_generate_tests,
-    поэтому тесты там должны получать app_config через test_app_config параметр,
-    а не через эту фикстуру.
     """
     return request.param
 
@@ -64,8 +53,6 @@ def app_config(request):
 def api_client(app_config, api_client_factory):
     """
     Клиент для текущей app_config.
-
-    Зависит от app_config, поэтому тоже параметризируется по приложениям.
     """
     return api_client_factory(app_config)
 
@@ -108,8 +95,6 @@ def session_tokens(api_client_factory):
 def app_token(app_config, session_tokens):
     """
     Токен для текущей app_config.
-
-    Зависит от app_config, поэтому параметризируется вместе с ним.
     """
     key = f"{app_config['app_name']}_{app_config['platform']}"
     token = session_tokens[key]

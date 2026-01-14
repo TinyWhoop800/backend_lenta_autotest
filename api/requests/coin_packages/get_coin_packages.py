@@ -14,17 +14,13 @@ def get_coin_packages(api_client, token):
 
 
 """
-Raw версия get_coin_packages БЕЗ Allure attachments.
+Raw версия get_coin_packages БЕЗ Allure attachments и авторизации.
 Используется при загрузке тестовых данных в conftest.
 """
 
-def get_coin_packages_raw(api_client, token):
+def get_coin_packages_raw(api_client):
     """
-    Получить доступные пакеты монет (БЕЗ Allure attachments).
-
-    Используется ТОЛЬКО при загрузке данных в pytest_configure,
-    где Allure ещё не инициализирован.
+    Получить доступные пакеты монет (БЕЗ Allure, БЕЗ токена).
     """
-    api_client.set_token(token)
-    response = api_client.get(Endpoints.GET_COIN_PACKAGES)
+    response = api_client.get(Endpoints.GET_COIN_PACKAGES, with_auth=False)
     return response
