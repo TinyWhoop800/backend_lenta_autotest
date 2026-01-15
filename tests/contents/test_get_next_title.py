@@ -6,7 +6,7 @@ from models.contents_models.get_next_title_model import GetNextTitleModel
 
 @allure.epic("Contents")
 @allure.feature("GET /next-title - Positive")
-class TestGetnextTitlePositive:
+class TestGetNextTitlePositive:
 
     @allure.story("Получение статуса: 200")
     @allure.title("Получение одного тайтла")

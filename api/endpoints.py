@@ -28,7 +28,7 @@ class Endpoints(Enum):
 
     """Genres"""
     GET_GENRES = "/genres"
-    GET_GENRES_GENRE_ID_CONTENTS = "/genres/{genre_Id}/contents"
+    GET_GENRES_GENRE_ID_CONTENTS = "/genres/{genre_id}/contents"
 
     """Episodes"""
     POST_EPISODES_EPISODE_LIKE = "/episodes/{episode}/like"
