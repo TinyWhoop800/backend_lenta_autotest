@@ -7,10 +7,10 @@ import pytest
 
 
 @allure.epic("Collections")
-@allure.feature("GET /collections/collection")
-@allure.story("Позитивные сценарии")
+@allure.feature("GET /collections/collection - Positive")
 class TestGetCollectionsCollectionPositive:
 
+    @allure.story("Получение статуса: 200")
     @allure.title("Получение спец. коллекции")
     def test_get_collections_collection_status_200(self, prepared_api_client_collections):
         """Успешное получение пакетов монет"""
@@ -31,11 +31,11 @@ class TestGetCollectionsCollectionPositive:
 
 
 @allure.epic("Collections")
-@allure.feature("GET /collections/collection")
-@allure.story("Негативные сценарии")
+@allure.feature("GET /collections/collection - Negative")
 class TestGetCollectionsCollectionNegative:
 
-    @allure.title("Получение ошибки 404")
+    @allure.story("Получение статуса: 404")
+    @allure.title("Невалидный collection_id")
     @pytest.mark.parametrize("invalid_id", INVALID_COLLECTION_IDS)
     def test_get_collections_collection_status_404(self, api_client, app_token, invalid_id):
         """Получение ошибки 404"""

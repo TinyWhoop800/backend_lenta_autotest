@@ -5,10 +5,10 @@ from models.contents_models.get_next_title_model import GetNextTitleModel
 
 
 @allure.epic("Contents")
-@allure.feature("GET /next-title")
-@allure.story("Позитивные сценарии")
+@allure.feature("GET /next-title - Positive")
 class TestGetnextTitlePositive:
 
+    @allure.story("Получение статуса: 200")
     @allure.title("Получение одного тайтла")
     def test_get_next_title_status_200(self, api_client, app_token):
         """Успешное получение одного тайтла"""
