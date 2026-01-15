@@ -36,8 +36,6 @@ def _load_collections_data():
     if _collections_test_data:
         return
 
-    logger.info("Loading collections data...")
-
     for app in APPS_LENTA:
         key = f"{app['app_name']}_{app['platform']}"
 

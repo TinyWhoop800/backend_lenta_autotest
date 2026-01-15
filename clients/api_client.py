@@ -68,15 +68,15 @@ class APIClient:
     def _prepare_url(
             self,
             endpoint: Union[str, Endpoints],
-            url_params: Optional[Dict[str, Any]] = None
+            path_params: Optional[Dict[str, Any]] = None  # ← path_params вместо url_params
     ) -> str:
-        """Подготовить URL с подстановкой параметров"""
+        """Подготовить URL с подстановкой PATH параметров"""
         if isinstance(endpoint, Endpoints):
             endpoint = endpoint.value
 
-        if url_params:
+        if path_params:
             try:
-                endpoint = endpoint.format(**url_params)
+                endpoint = endpoint.format(**path_params)
             except KeyError as e:
                 raise ValueError(f"Missing URL parameter: {e}") from e
 
@@ -84,55 +84,74 @@ class APIClient:
             return endpoint
         return f"{self.base_url}{endpoint}"
 
-    @allure.step("POST {endpoint}")
+    def get(
+            self,
+            endpoint: Union[str, Endpoints],
+            with_auth: bool = True,
+            path_params: Optional[Dict[str, Any]] = None,
+            query_params: Optional[Dict[str, Any]] = None,
+            **kwargs
+    ) -> requests.Response:
+        """
+        GET запрос.
+
+        Args:
+            endpoint: Endpoint или Enum
+            with_auth: Добавлять ли Authorization header
+            path_params: Параметры для подстановки в URL path (типа /contents/{id})
+            query_params: Query параметры (типа ?page=1&limit=10)
+            **kwargs: Остальные параметры для requests.get()
+        """
+        url = self._prepare_url(endpoint, path_params)
+        headers = self._get_headers(with_auth)
+        logger.debug(f"GET {url}")
+        return self.session.get(url, headers=headers, params=query_params, **kwargs)
+
     def post(
             self,
             endpoint: Union[str, Endpoints],
             with_auth: bool = True,
-            url_params: Optional[Dict[str, Any]] = None,
+            path_params: Optional[Dict[str, Any]] = None,
+            query_params: Optional[Dict[str, Any]] = None,
             **kwargs
-    ):
+    ) -> requests.Response:
         """
         POST запрос.
 
         Args:
             endpoint: Endpoint или Enum
             with_auth: Добавлять ли Authorization header
-            url_params: Параметры для подстановки в URL
+            path_params: Параметры для подстановки в URL path
+            query_params: Query параметры
             **kwargs: Остальные параметры для requests.post()
         """
-        url = self._prepare_url(endpoint, url_params)
+        url = self._prepare_url(endpoint, path_params)
         headers = self._get_headers(with_auth)
         logger.debug(f"POST {url}")
-        return self.session.post(url, headers=headers, **kwargs)
+        return self.session.post(url, headers=headers, params=query_params, **kwargs)
 
-    @allure.step("GET запрос")
-    def get(
-            self,
-            endpoint: Union[str, Endpoints],
-            with_auth: bool = True,
-            url_params: Optional[Dict[str, Any]] = None,
-            **kwargs
-    ):
-        """GET запрос."""
-        url = self._prepare_url(endpoint, url_params)
-        headers = self._get_headers(with_auth)
-        logger.debug(f"GET {url}")
-        return self.session.get(url, headers=headers, **kwargs)
-
-    @allure.step("DELETE {endpoint}")
     def delete(
             self,
             endpoint: Union[str, Endpoints],
             with_auth: bool = True,
-            url_params: Optional[Dict[str, Any]] = None,
+            path_params: Optional[Dict[str, Any]] = None,
+            query_params: Optional[Dict[str, Any]] = None,
             **kwargs
-    ):
-        """DELETE запрос."""
-        url = self._prepare_url(endpoint, url_params)
+    ) -> requests.Response:
+        """
+        DELETE запрос.
+
+        Args:
+            endpoint: Endpoint или Enum
+            with_auth: Добавлять ли Authorization header
+            path_params: Параметры для подстановки в URL path
+            query_params: Query параметры
+            **kwargs: Остальные параметры для requests.delete()
+        """
+        url = self._prepare_url(endpoint, path_params)
         headers = self._get_headers(with_auth)
         logger.debug(f"DELETE {url}")
-        return self.session.delete(url, headers=headers, **kwargs)
+        return self.session.delete(url, headers=headers, params=query_params, **kwargs)
 
     def close(self):
         """Закрыть сессию"""

@@ -5,10 +5,10 @@ from models.coin_packages_model.get_coin_packages_model import GetCoinPackagesMo
 
 
 @allure.epic("Coin Packages")
-@allure.feature("GET /coin-packages")
-@allure.story("Позитивные сценарии")
+@allure.feature("GET /coin-packages - Positive")
 class TestGetCoinPackagesPositive:
 
+    @allure.story("Получение статуса: 200")
     @allure.title("Успешное получение пакетов с монетами")
     def test_get_coin_packages_success(self, api_client, app_token):
         """Успешное получение пакетов монет"""

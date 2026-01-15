@@ -11,9 +11,10 @@ import pytest
 #TODO: Статус 500 на тест. стенде, на бэкенде нужно изменить статус
 
 @allure.epic("Coin Packages")
-@allure.feature("POST /coin-packages - Positive tests")
+@allure.feature("POST /coin-packages - Positive")
 class TestPostCoinPackagesPositive:
 
+    @allure.story("Получение статуса: 200")
     @allure.title('Получение платежной ссылки с валидным id coin-packages: "{prepared_api_client.coin_id}"')
     def test_post_coin_packages_valid_id(self, prepared_api_client):
         with allure.step(
@@ -35,12 +36,12 @@ class TestPostCoinPackagesPositive:
 
 
 @allure.epic("Coin Packages")
-@allure.feature("POST /coin-packages - Negative ")
+@allure.feature("POST /coin-packages - Negative")
 class TestPostCoinPackagesNegative:
 
-
-    @allure.title('Без токена = 401: "{prepared_api_client.coin_id}"')
-    def test_post_coin_packages_valid_id_no_auth(self, prepared_api_client):
+    @allure.story("Получение статуса: 401")
+    @allure.title('Без авторизации: "{prepared_api_client.coin_id}"')
+    def test_post_coin_packages_valid_id_no_auth_status_401(self, prepared_api_client):
         with allure.step("POST /coin-packages без токена"):
             response = post_coin_package(
                 prepared_api_client.client,
@@ -51,9 +52,10 @@ class TestPostCoinPackagesNegative:
         with allure.step("Проверить 401 Unauthorized"):
             check_status(response, 401)
 
+    @allure.story("Получение статуса: 404")
     @pytest.mark.parametrize("invalid_coin_id", INVALID_COIN_IDS)
-    @allure.title('Невалидный coin_id возвращает 404: "{invalid_coin_id}"')
-    def test_invalid_coin_id(self, api_client, app_token, invalid_coin_id):
+    @allure.title('Невалидный coin_id: "{invalid_coin_id}"')
+    def test_invalid_coin_id_status_404(self, api_client, app_token, invalid_coin_id):
         """Каждый невалидный coin_id со случайным payment_type"""
         with allure.step(f"POST /coin-packages с невалидным coin_id"):
             response = post_coin_package(

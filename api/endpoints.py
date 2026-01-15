@@ -22,7 +22,7 @@ class Endpoints(Enum):
     """Contents"""
     GET_NEXT_TITLE = "/next-title"
     #TODO: GET_CONTENT нет в swagger
-    GET_CONTENT = "/content/{page}"
+    GET_CONTENTS = "/contents/"
     GET_CONTENTS_CONTENT = "/contents/{content}"
     GET_CONTENTS_CONTENT_EPISODES = "/contents/{content}/episodes"
 

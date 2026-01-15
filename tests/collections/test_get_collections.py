@@ -5,10 +5,10 @@ from models.collections_model.get_collections_model import GetCollectionsModel
 
 
 @allure.epic("Collections")
-@allure.feature("GET /collections")
-@allure.story("Позитивные сценарии")
+@allure.feature("GET /collections - Positive")
 class TestGetCollectionsPositive:
 
+    @allure.story("Получение статуса: 200")
     @allure.title("Успешное получение списка коллекций")
     def test_get_collections_status_200(self, api_client, app_token):
         """Успешное получение пакетов монет"""

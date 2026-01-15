@@ -10,7 +10,7 @@ def get_collections_collection(api_client, token, collection_id):
     response = api_client.get(
         Endpoints.GET_COLLECTIONS_COLLECTION,
         with_auth=True,
-        url_params={"collection": collection_id}
+        path_params={"collection": collection_id}
     )
     attach_curl(response, f"curl: GET /collections/{collection_id}")
     attach_response_details(response)
